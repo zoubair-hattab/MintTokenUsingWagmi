@@ -36,18 +36,19 @@ const Content = () => {
       hash,
     });
 
-  const { data: totalSupplyData } = useReadContract({
+  const {
+    data: totalSupplyData,
+    isLoading,
+    isFetching,
+    isError,
+    isSuccess,
+    refetch: refetchAllowance,
+    queryKey,
+  } = useReadContract({
     address: contractAddress,
     abi: token?.abi,
     functionName: 'totalSupply',
   });
-
-  useEffect(() => {
-    if (totalSupplyData) {
-      let temp = formatEther(totalSupplyData);
-      setSupplyData(Number(temp).toFixed(5));
-    }
-  }, [totalSupplyData]);
 
   const {
     data: hashsBuy,
@@ -86,6 +87,22 @@ const Content = () => {
     useWaitForTransactionReceipt({
       hash: hashFaucet,
     });
+
+  useEffect(() => {
+    if (isConfirmed || isConfirmedBuy || isConfirmedFaucet) {
+      refetchAllowance?.();
+    }
+    if (totalSupplyData) {
+      let temp = formatEther(totalSupplyData);
+      setSupplyData(Number(temp).toFixed(5));
+    }
+  }, [
+    totalSupplyData,
+    refetchAllowance,
+    isConfirmed,
+    isConfirmedBuy,
+    isConfirmedFaucet,
+  ]);
   return (
     <section className="section content">
       <div className="container">
